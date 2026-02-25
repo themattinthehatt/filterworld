@@ -10,7 +10,8 @@ panes:
   - label: dino features
     layers:
       - type: feature
-        method: first3
+        method: pca
+        pca_path: dino_pca.npz
 
 output:
   fps: null

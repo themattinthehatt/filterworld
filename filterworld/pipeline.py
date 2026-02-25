@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from filterworld.canvas.canvas import Canvas
-from filterworld.config import Config, load_config
+from filterworld.config import load_config
 from filterworld.filters.base import Filter
 from filterworld.filters.dino_filter import DINOFilter
 from filterworld.filters.file_filter import FileFilter
@@ -31,6 +31,33 @@ def _is_file_filter_path(model_path: str) -> bool:
     return p.suffix in _FILE_FILTER_EXTENSIONS and p.exists()
 
 
+def build_filter(model_path: str) -> Filter:
+    """Dispatch to the appropriate Filter based on model_path.
+
+    Args:
+        model_path: model path/identifier or pre-computed output file
+
+    Returns:
+        an initialized Filter instance
+
+    Raises:
+        ValueError: if model_path is not recognized
+    """
+    if model_path == 'identity':
+        logger.info('using identity filter (passthrough)')
+        return IdentityFilter()
+    if _is_file_filter_path(model_path):
+        logger.info('using pre-computed filter output from %s', model_path)
+        return FileFilter(model_path)
+    if 'dino' in model_path:
+        logger.info('using DINO model %s', model_path)
+        return DINOFilter(model_path)
+    raise ValueError(
+        f'unsupported model path: {model_path}. '
+        f'use "identity", a file path, or a DINO model name.'
+    )
+
+
 class Pipeline:
     """Wires together VideoReader, Filter, Canvas, and Writer.
 
@@ -53,32 +80,12 @@ class Pipeline:
         self.output_path = output_path
         self.config = load_config(config_path)
 
-    def _build_filter(self) -> Filter:
-        """Dispatch to the appropriate Filter based on model_path.
-
-        Returns:
-            an initialized Filter instance
-        """
-        if self.model_path == 'identity':
-            logger.info('using identity filter (passthrough)')
-            return IdentityFilter()
-        if _is_file_filter_path(self.model_path):
-            logger.info('using pre-computed filter output from %s', self.model_path)
-            return FileFilter(self.model_path)
-        if 'dino' in self.model_path:
-            logger.info('using DINO model %s', self.model_path)
-            return DINOFilter(self.model_path)
-        raise ValueError(
-            f'unsupported model path: {self.model_path}. '
-            f'use "identity", a file path, or a DINO model name.'
-        )
-
     def run(self) -> None:
         """Execute the pipeline: read frames, filter, render, write."""
         logger.info('starting pipeline: %s -> %s', self.video_path, self.output_path)
 
         reader = VideoReader(self.video_path)
-        vid_filter = self._build_filter()
+        vid_filter = build_filter(self.model_path)
         canvas = Canvas(self.config)
 
         output_cfg = self.config.output
