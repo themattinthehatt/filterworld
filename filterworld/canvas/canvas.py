@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 
 from filterworld.canvas.pane import Pane
+from filterworld.config import Config
 from filterworld.filters.base import FilterOutput
 from filterworld.layers.image_layer import ImageLayer
 
@@ -93,21 +94,21 @@ class GridLayout(Layout):
 class Canvas:
     """Assembles panes into a final output frame.
 
-    When no config is provided, creates a default single-pane canvas
-    that renders the original frame (identity passthrough).
+    Uses configuration to determine layout and pane setup. When no
+    panes are configured, creates a default single-pane canvas that
+    renders the original frame.
 
     Args:
-        config_path: optional path to a YAML config file defining
-            panes and layout; if None, uses a single-pane default
+        config: parsed Config instance
     """
 
-    def __init__(self, config_path: str | None = None) -> None:
+    def __init__(self, config: Config) -> None:
+        self._config = config
         self.panes: list[Pane] = []
         self.layout: Layout | None = None
-        self._config_path = config_path
 
-        if config_path is not None:
-            self._load_config(config_path)
+        if config.panes:
+            self._build_from_config()
         else:
             self._build_default()
 
@@ -115,18 +116,35 @@ class Canvas:
         """Build a default single-pane canvas with an image layer."""
         pane = Pane(layers=[ImageLayer()], label='original')
         self.panes = [pane]
-        # layout will be initialized on first render when we know frame size
 
-    def _load_config(self, config_path: str) -> None:
-        """Load canvas configuration from a YAML file.
-
-        Args:
-            config_path: path to the YAML config file
+    def _build_from_config(self) -> None:
+        """Build panes from configuration.
 
         Raises:
-            NotImplementedError: config loading is not yet implemented
+            NotImplementedError: pane config parsing is not yet implemented
         """
-        raise NotImplementedError('YAML config loading is not yet implemented')
+        raise NotImplementedError('pane config parsing is not yet implemented')
+
+    def _init_layout(self, frame_width: int, frame_height: int) -> None:
+        """Initialize layout from config and frame dimensions.
+
+        Uses config output width/height if set, otherwise falls back
+        to the input frame dimensions.
+
+        Args:
+            frame_width: input frame width in pixels
+            frame_height: input frame height in pixels
+        """
+        output_cfg = self._config.output
+        layout_cfg = self._config.layout
+
+        w = output_cfg.width or frame_width
+        h = output_cfg.height or frame_height
+
+        if layout_cfg.type == 'grid':
+            self.layout = GridLayout(width=w, height=h, n_cols=layout_cfg.cols)
+        else:
+            raise ValueError(f'unsupported layout type: {layout_cfg.type}')
 
     def render(
         self,
@@ -142,12 +160,9 @@ class Canvas:
         Returns:
             final output frame, dtype uint8
         """
-        h, w = frame.shape[:2]
-
-        # lazily initialize layout from first frame dimensions
         if self.layout is None:
-            n_cols = 1 if len(self.panes) == 1 else 2
-            self.layout = GridLayout(width=w, height=h, n_cols=n_cols)
+            h, w = frame.shape[:2]
+            self._init_layout(w, h)
 
         rendered_panes = [
             pane.render(frame, filter_output) for pane in self.panes

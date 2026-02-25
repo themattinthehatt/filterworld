@@ -1,0 +1,12 @@
+layout:
+  type: grid
+  rows: 1
+  cols: 1
+
+panes: []
+
+output:
+  fps: null      # null = use input video fps
+  codec: mp4v
+  width: null    # null = use input video width
+  height: null   # null = use input video height

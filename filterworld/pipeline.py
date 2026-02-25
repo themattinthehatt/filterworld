@@ -4,9 +4,11 @@ import logging
 from pathlib import Path
 
 from filterworld.canvas.canvas import Canvas
+from filterworld.config import Config, load_config
 from filterworld.filters.base import Filter
 from filterworld.filters.file_filter import FileFilter
 from filterworld.filters.hf_filter import HuggingFaceFilter
+from filterworld.filters.identity_filter import IdentityFilter
 from filterworld.media.video import VideoReader
 from filterworld.writers.video_writer import VideoWriter
 
@@ -48,15 +50,18 @@ class Pipeline:
     ) -> None:
         self.video_path = video_path
         self.model_path = model_path
-        self.config_path = config_path
         self.output_path = output_path
+        self.config = load_config(config_path)
 
     def _build_filter(self) -> Filter:
-        """Dispatch to FileFilter or HuggingFaceFilter based on model_path.
+        """Dispatch to the appropriate Filter based on model_path.
 
         Returns:
             an initialized Filter instance
         """
+        if self.model_path == 'identity':
+            logger.info('using identity filter (passthrough)')
+            return IdentityFilter()
         if _is_file_filter_path(self.model_path):
             logger.info('using pre-computed filter output from %s', self.model_path)
             return FileFilter(self.model_path)
@@ -69,8 +74,11 @@ class Pipeline:
 
         reader = VideoReader(self.video_path)
         vid_filter = self._build_filter()
-        canvas = Canvas(self.config_path)
-        writer = VideoWriter(self.output_path, fps=reader.fps)
+        canvas = Canvas(self.config)
+
+        output_cfg = self.config.output
+        fps = output_cfg.fps or reader.fps
+        writer = VideoWriter(self.output_path, fps=fps, fourcc=output_cfg.codec)
 
         try:
             for frame in reader:
