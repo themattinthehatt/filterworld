@@ -6,7 +6,7 @@ from pathlib import Path
 from filterworld.canvas.canvas import Canvas
 from filterworld.config import load_config
 from filterworld.filters.base import Filter
-from filterworld.filters.dino_filter import DINOFilter
+from filterworld.filters.dinov1_filter import DINOv1Filter
 from filterworld.filters.dinov2_filter import DINOv2Filter
 from filterworld.filters.file_filter import FileFilter
 from filterworld.filters.identity_filter import IdentityFilter
@@ -20,8 +20,8 @@ _FILE_FILTER_EXTENSIONS = {'.json', '.jsonl', '.pkl', '.pickle', '.npz', '.pt', 
 
 # standardized model name -> (huggingface identifier, filter class)
 _MODEL_REGISTRY: dict[str, tuple[str, type[Filter]]] = {
-    'dinov1-small': ('facebook/dino-vits16', DINOFilter),
-    'dinov1-base': ('facebook/dino-vitb16', DINOFilter),
+    'dinov1-small': ('facebook/dino-vits16', DINOv1Filter),
+    'dinov1-base': ('facebook/dino-vitb16', DINOv1Filter),
     'dinov2-small': ('facebook/dinov2-small', DINOv2Filter),
     'dinov2-base': ('facebook/dinov2-base', DINOv2Filter),
 }
@@ -65,11 +65,7 @@ def build_filter(model_path: str, resolution: int | None = None) -> Filter:
     if model_path in _MODEL_REGISTRY:
         hf_name, filter_cls = _MODEL_REGISTRY[model_path]
         logger.info('using model %s (%s)', model_path, hf_name)
-        # pass resolution to filters that support it
-        kwargs = {}
-        if resolution is not None:
-            kwargs['resolution'] = resolution
-        return filter_cls(hf_name, **kwargs)
+        return filter_cls(hf_name, resolution=resolution)
     model_names = ', '.join(sorted(_MODEL_REGISTRY.keys()))
     raise ValueError(
         f'unsupported model: {model_path!r}. '

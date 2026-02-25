@@ -1,4 +1,4 @@
-"""DINO ViT feature extraction filter."""
+"""DINOv1 ViT feature extraction filter."""
 
 import logging
 import math
@@ -12,19 +12,26 @@ from filterworld.filters.base import FeatureOutput, Filter
 logger = logging.getLogger(__name__)
 
 
-class DINOFilter(Filter):
-    """Extracts spatial features from frames using a DINO ViT model.
+class DINOv1Filter(Filter):
+    """Extracts spatial features from frames using a DINOv1 ViT model.
 
     Args:
         model_name: Hugging Face model identifier (e.g. 'facebook/dino-vits16')
+        resolution: input image resolution in pixels; must be divisible by patch_size.
+            None uses the model default (typically 224).
     """
 
-    def __init__(self, model_name: str) -> None:
+    def __init__(self, model_name: str, resolution: int | None = None) -> None:
         self.model_name = model_name
+        self.resolution = resolution
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        logger.info('loading DINO model %s on %s', model_name, self.device)
+        logger.info('loading DINOv1 model %s on %s', model_name, self.device)
 
-        self.processor = ViTImageProcessor.from_pretrained(model_name)
+        processor_kwargs = {}
+        if resolution is not None:
+            processor_kwargs['size'] = {'height': resolution, 'width': resolution}
+            processor_kwargs['crop_size'] = {'height': resolution, 'width': resolution}
+        self.processor = ViTImageProcessor.from_pretrained(model_name, **processor_kwargs)
         self.model = ViTModel.from_pretrained(model_name, add_pooling_layer=False)
         self.model.eval()
         self.model.to(self.device)
