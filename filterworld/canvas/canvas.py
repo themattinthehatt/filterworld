@@ -1,5 +1,6 @@
 """Canvas: assembles Panes into a full frame."""
 
+import logging
 from abc import ABC, abstractmethod
 
 import cv2
@@ -8,7 +9,40 @@ import numpy as np
 from filterworld.canvas.pane import Pane
 from filterworld.config import Config
 from filterworld.filters.base import FilterOutput
+from filterworld.layers.base import Layer
+from filterworld.layers.feature_layer import FeatureLayer
 from filterworld.layers.image_layer import ImageLayer
+
+logger = logging.getLogger(__name__)
+
+# maps layer type strings to Layer classes
+_LAYER_REGISTRY: dict[str, type[Layer]] = {
+    'image': ImageLayer,
+    'feature': FeatureLayer,
+}
+
+
+def _build_layer(layer_dict: dict) -> Layer:
+    """Instantiate a Layer from a config dictionary.
+
+    Args:
+        layer_dict: dictionary with a 'type' key and optional kwargs
+
+    Returns:
+        an initialized Layer instance
+
+    Raises:
+        ValueError: if the layer type is unknown
+    """
+    layer_dict = dict(layer_dict)  # shallow copy to avoid mutating config
+    layer_type = layer_dict.pop('type', 'image')
+    cls = _LAYER_REGISTRY.get(layer_type)
+    if cls is None:
+        raise ValueError(
+            f'unknown layer type: {layer_type!r}. '
+            f'available types: {list(_LAYER_REGISTRY.keys())}'
+        )
+    return cls(**layer_dict)
 
 
 class Layout(ABC):
@@ -118,12 +152,11 @@ class Canvas:
         self.panes = [pane]
 
     def _build_from_config(self) -> None:
-        """Build panes from configuration.
-
-        Raises:
-            NotImplementedError: pane config parsing is not yet implemented
-        """
-        raise NotImplementedError('pane config parsing is not yet implemented')
+        """Build panes from configuration."""
+        for pane_cfg in self._config.panes:
+            layers = [_build_layer(layer_dict) for layer_dict in pane_cfg.layers]
+            pane = Pane(layers=layers, label=pane_cfg.label)
+            self.panes.append(pane)
 
     def _init_layout(self, frame_width: int, frame_height: int) -> None:
         """Initialize layout from config and frame dimensions.
@@ -138,8 +171,14 @@ class Canvas:
         output_cfg = self._config.output
         layout_cfg = self._config.layout
 
-        w = output_cfg.width or frame_width
-        h = output_cfg.height or frame_height
+        n_panes = len(self.panes)
+        n_cols = layout_cfg.cols
+        n_rows = (n_panes + n_cols - 1) // n_cols
+
+        # when the user hasn't set explicit dimensions, scale the canvas
+        # so each grid cell matches the input frame size
+        w = output_cfg.width or frame_width * n_cols
+        h = output_cfg.height or frame_height * n_rows
 
         if layout_cfg.type == 'grid':
             self.layout = GridLayout(width=w, height=h, n_cols=layout_cfg.cols)

@@ -30,6 +30,10 @@ dependencies = [
 	"numpy",
 	"opencv-python",
 	"pyyaml",
+	"scikit-learn",
+    "torch",
+    "torchvision",
+	"tqdm",
 	"transformers",
 ]
 

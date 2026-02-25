@@ -34,6 +34,7 @@ This file contains project-specific guidelines for Claude Code when working on t
 - Do not allow trailing whitespace
 - Do not include whitespace for blank lines
 - Use single quotes for strings
+- Use f-strings instead of %
 - Add a comma to the end of multi-line function arguments:
 ```python
 foo(
