@@ -70,7 +70,7 @@ class Pipeline:
         reader = VideoReader(self.video_path)
         vid_filter = self._build_filter()
         canvas = Canvas(self.config_path)
-        writer = VideoWriter(self.output_path)
+        writer = VideoWriter(self.output_path, fps=reader.fps)
 
         try:
             for frame in reader:
