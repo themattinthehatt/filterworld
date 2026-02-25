@@ -27,7 +27,10 @@ classifiers = [
 ]
 
 dependencies = [
-	"transformers"
+	"numpy",
+	"opencv-python",
+	"pyyaml",
+	"transformers",
 ]
 
 [project.urls]
@@ -40,7 +43,7 @@ documentation = "https://github.com/themattinthehatt/filterworld"
 python = ">=3.10,<3.13"
 
 [tool.poetry.scripts]
-litaction = "filterworld.cli.main:main"
+filterworld = "filterworld.cli.main:main"
 
 [project.optional-dependencies]
 dev = [
