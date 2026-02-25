@@ -57,7 +57,7 @@ output:
 filterworld input.mp4 identity --config small.yaml -o small_output.mp4
 ```
 
-See `filterworld/configs/default.yaml` for the full default configuration.
+See `configs/default.yaml` for the full default configuration.
 
 ### DINO feature extraction
 
@@ -70,7 +70,7 @@ filterworld input.mp4 facebook/dino-vits16 -o dino_output.mp4
 Use the included `dino.yaml` config to plot the original video side-by-side with the DINO feature visualization:
 
 ```bash
-filterworld input.mp4 facebook/dino-vits16 --config filterworld/configs/dino.yaml -o dino_output.mp4
+filterworld input.mp4 facebook/dino-vits16 --config configs/dino.yaml -o dino_output.mp4
 ```
 
-The config sets up a two-column grid layout with the original frame on the left and a colorized view of the first three feature channels on the right. See `filterworld/configs/dino.yaml` for details.
+The config sets up a two-column grid layout with the original frame on the left and a colorized view of the first three feature channels on the right. See `configs/dino.yaml` for details.

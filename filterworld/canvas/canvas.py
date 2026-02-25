@@ -171,8 +171,14 @@ class Canvas:
         output_cfg = self._config.output
         layout_cfg = self._config.layout
 
-        w = output_cfg.width or frame_width
-        h = output_cfg.height or frame_height
+        n_panes = len(self.panes)
+        n_cols = layout_cfg.cols
+        n_rows = (n_panes + n_cols - 1) // n_cols
+
+        # when the user hasn't set explicit dimensions, scale the canvas
+        # so each grid cell matches the input frame size
+        w = output_cfg.width or frame_width * n_cols
+        h = output_cfg.height or frame_height * n_rows
 
         if layout_cfg.type == 'grid':
             self.layout = GridLayout(width=w, height=h, n_cols=layout_cfg.cols)
