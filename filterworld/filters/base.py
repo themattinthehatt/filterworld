@@ -35,9 +35,13 @@ class SegmentationOutput(FilterOutput):
 
 @dataclass
 class FeatureOutput(FilterOutput):
-    """Feature extraction results."""
+    """Feature extraction results.
 
-    pass
+    Args:
+        features: spatial feature tensor of shape (D, H, W)
+    """
+
+    features: np.ndarray = field(default_factory=lambda: np.empty(0))
 
 
 @dataclass

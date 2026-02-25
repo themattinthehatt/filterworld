@@ -1,0 +1,19 @@
+layout:
+  type: grid
+  rows: 1
+  cols: 2
+
+panes:
+  - label: original
+    layers:
+      - type: image
+  - label: dino features
+    layers:
+      - type: feature
+        method: first3
+
+output:
+  fps: null
+  codec: mp4v
+  width: null
+  height: null

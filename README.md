@@ -14,7 +14,7 @@ conda activate filter
 Install dependencies:
 
 ```bash
-pip install numpy opencv-python transformers
+pip install numpy opencv-python transformers torch
 ```
 
 Install filterworld in development mode:
@@ -58,3 +58,19 @@ filterworld input.mp4 identity --config small.yaml -o small_output.mp4
 ```
 
 See `filterworld/configs/default.yaml` for the full default configuration.
+
+### DINO feature extraction
+
+Run a DINO ViT model to extract spatial features from each frame:
+
+```bash
+filterworld input.mp4 facebook/dino-vits16 -o dino_output.mp4
+```
+
+Use the included `dino.yaml` config to plot the original video side-by-side with the DINO feature visualization:
+
+```bash
+filterworld input.mp4 facebook/dino-vits16 --config filterworld/configs/dino.yaml -o dino_output.mp4
+```
+
+The config sets up a two-column grid layout with the original frame on the left and a colorized view of the first three feature channels on the right. See `filterworld/configs/dino.yaml` for details.

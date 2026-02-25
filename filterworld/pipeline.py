@@ -6,8 +6,8 @@ from pathlib import Path
 from filterworld.canvas.canvas import Canvas
 from filterworld.config import Config, load_config
 from filterworld.filters.base import Filter
+from filterworld.filters.dino_filter import DINOFilter
 from filterworld.filters.file_filter import FileFilter
-from filterworld.filters.hf_filter import HuggingFaceFilter
 from filterworld.filters.identity_filter import IdentityFilter
 from filterworld.media.video import VideoReader
 from filterworld.writers.video_writer import VideoWriter
@@ -65,8 +65,13 @@ class Pipeline:
         if _is_file_filter_path(self.model_path):
             logger.info('using pre-computed filter output from %s', self.model_path)
             return FileFilter(self.model_path)
-        logger.info('using HuggingFace model %s', self.model_path)
-        return HuggingFaceFilter(self.model_path)
+        if 'dino' in self.model_path:
+            logger.info('using DINO model %s', self.model_path)
+            return DINOFilter(self.model_path)
+        raise ValueError(
+            f'unsupported model path: {self.model_path}. '
+            f'use "identity", a file path, or a DINO model name.'
+        )
 
     def run(self) -> None:
         """Execute the pipeline: read frames, filter, render, write."""
