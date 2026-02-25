@@ -68,6 +68,12 @@ Available models:
 - `dinov1-base` — DINO ViT-B/16
 - `dinov2-small` — DINOv2 ViT-S/14
 - `dinov2-base` — DINOv2 ViT-B/14
+- `dinov3-small` — DINOv3 ViT-S/16 (gated, requires HuggingFace auth)
+- `dinov3-base` — DINOv3 ViT-B/16 (gated, requires HuggingFace auth)
+
+DINOv3 models are gated on HuggingFace. Run `hf auth login` and request access to the model page before use. If authentication is missing, filterworld will print detailed setup instructions.
+
+All models support `--resolution N` to override the default input size (e.g. `--resolution 448` for higher-resolution feature maps).
 
 **Step 1: Precompute PCA weights**
 

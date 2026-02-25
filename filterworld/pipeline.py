@@ -3,11 +3,14 @@
 import logging
 from pathlib import Path
 
+from tqdm import tqdm
+
 from filterworld.canvas.canvas import Canvas
 from filterworld.config import load_config
 from filterworld.filters.base import Filter
 from filterworld.filters.dinov1_filter import DINOv1Filter
 from filterworld.filters.dinov2_filter import DINOv2Filter
+from filterworld.filters.dinov3_filter import DINOv3Filter
 from filterworld.filters.file_filter import FileFilter
 from filterworld.filters.identity_filter import IdentityFilter
 from filterworld.media.video import VideoReader
@@ -24,6 +27,8 @@ _MODEL_REGISTRY: dict[str, tuple[str, type[Filter]]] = {
     'dinov1-base': ('facebook/dino-vitb16', DINOv1Filter),
     'dinov2-small': ('facebook/dinov2-small', DINOv2Filter),
     'dinov2-base': ('facebook/dinov2-base', DINOv2Filter),
+    'dinov3-small': ('facebook/dinov3-vits16-pretrain-lvd1689m', DINOv3Filter),
+    'dinov3-base': ('facebook/dinov3-vitb16-pretrain-lvd1689m', DINOv3Filter),
 }
 
 
@@ -110,7 +115,7 @@ class Pipeline:
         writer = VideoWriter(self.output_path, fps=fps, fourcc=output_cfg.codec)
 
         try:
-            for frame in reader:
+            for frame in tqdm(reader, total=reader.frame_count, desc='rendering'):
                 filter_output = vid_filter.process_frame(frame)
                 rendered = canvas.render(frame, filter_output)
                 writer.write_frame(rendered)

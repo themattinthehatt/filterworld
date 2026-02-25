@@ -4,6 +4,7 @@ import logging
 
 import numpy as np
 from sklearn.decomposition import PCA
+from tqdm import tqdm
 
 from filterworld.media.video import VideoReader
 from filterworld.pipeline import build_filter
@@ -50,6 +51,7 @@ def precompute_pca(
 
     # collect patch embeddings from selected frames
     embeddings = []
+    pbar = tqdm(total=len(indices_selected), desc='extracting features')
     for idx_frame, frame in enumerate(reader):
         if idx_frame not in indices_selected:
             continue
@@ -58,9 +60,8 @@ def precompute_pca(
         d, h, w = features.shape
         patches = features.reshape(d, h * w).T  # (H*W, D)
         embeddings.append(patches)
-
-        if (len(embeddings) % 50) == 0:
-            logger.info('processed %d/%d frames', len(embeddings), len(indices_selected))
+        pbar.update(1)
+    pbar.close()
 
     all_embeddings = np.concatenate(embeddings, axis=0)  # (N_total, D)
     logger.info('fitting PCA on %d patch embeddings of dimension %d', *all_embeddings.shape)
