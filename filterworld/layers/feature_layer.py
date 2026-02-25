@@ -68,7 +68,7 @@ class FeatureLayer(Layer):
         vis = self._reduce(features)  # (H_feat, W_feat, 3), uint8
 
         h, w = frame.shape[:2]
-        vis_resized = cv2.resize(vis, (w, h), interpolation=cv2.INTER_LINEAR)
+        vis_resized = cv2.resize(vis, (w, h), interpolation=cv2.INTER_NEAREST)  # cv2.INTER_LINEAR)
 
         if self.opacity >= 1.0:
             return vis_resized
@@ -137,16 +137,12 @@ class FeatureLayer(Layer):
         centered = patches - self._pca_mean  # (H*W, D)
         projected = centered @ self._pca_components.T  # (H*W, 3)
 
-        # normalize each component to 0-255
-        result = np.zeros((h * w, 3), dtype=np.uint8)
-        for idx_ch in range(3):
-            ch = projected[:, idx_ch]
-            ch_min = ch.min()
-            ch_max = ch.max()
-            if ch_max - ch_min > 0:
-                normalized = (ch - ch_min) / (ch_max - ch_min) * 255.0
-            else:
-                normalized = np.zeros_like(ch)
-            result[:, idx_ch] = normalized.astype(np.uint8)
+        # normalize to 0-255 using global min/max across all channels
+        val_min = projected.min()
+        val_max = projected.max()
+        if val_max - val_min > 0:
+            normalized = (projected - val_min) / (val_max - val_min) * 255.0
+        else:
+            normalized = np.zeros_like(projected)
 
-        return result.reshape(h, w, 3)
+        return normalized.astype(np.uint8).reshape(h, w, 3)

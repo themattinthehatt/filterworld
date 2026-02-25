@@ -16,6 +16,7 @@ def precompute_pca(
     model_path: str,
     output_path: str,
     max_frames: int = 200,
+    resolution: int | None = None,
 ) -> None:
     """Fit PCA on patch embeddings from a video and save weights to disk.
 
@@ -25,12 +26,13 @@ def precompute_pca(
 
     Args:
         video_path: path to the input video file
-        model_path: model path/identifier (e.g. 'facebook/dino-vits16')
+        model_path: model name (e.g. 'dinov2-small')
         output_path: output .npz path for PCA weights
         max_frames: maximum number of frames to use for PCA fitting
+        resolution: optional model input resolution override in pixels
     """
     reader = VideoReader(video_path)
-    vid_filter = build_filter(model_path)
+    vid_filter = build_filter(model_path, resolution=resolution)
     frame_count = reader.frame_count
 
     # determine which frame indices to process

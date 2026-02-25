@@ -46,7 +46,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser_run.add_argument(
         'model',
-        help='model path/identifier or pre-computed output file',
+        help='model name (e.g. dinov1-small, dinov2-base) or pre-computed output file',
     )
     parser_run.add_argument(
         '--config',
@@ -57,6 +57,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         '--output', '-o',
         default=None,
         help='output video path (default: derived from input filename)',
+    )
+    parser_run.add_argument(
+        '--resolution',
+        type=int,
+        default=None,
+        help='model input resolution in pixels (default: model default)',
     )
 
     # --- precompute subcommand ---
@@ -70,7 +76,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser_precompute.add_argument(
         'model',
-        help='model path/identifier (e.g. facebook/dino-vits16)',
+        help='model name (e.g. dinov1-small, dinov2-base)',
     )
     parser_precompute.add_argument(
         '--output', '-o',
@@ -82,6 +88,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=int,
         default=200,
         help='max frames to use for PCA fitting (default: 200)',
+    )
+    parser_precompute.add_argument(
+        '--resolution',
+        type=int,
+        default=None,
+        help='model input resolution in pixels (default: model default)',
     )
 
     args = parser.parse_args(argv)
@@ -114,6 +126,7 @@ def main(argv: list[str] | None = None) -> None:
             model_path=args.model,
             config_path=args.config,
             output_path=output_path,
+            resolution=args.resolution,
         )
         pipeline.run()
 
@@ -125,6 +138,7 @@ def main(argv: list[str] | None = None) -> None:
             model_path=args.model,
             output_path=args.output,
             max_frames=args.max_frames,
+            resolution=args.resolution,
         )
 
 
