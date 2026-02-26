@@ -59,9 +59,9 @@ filterworld run input.mp4 identity --config small.yaml -o small_output.mp4
 
 See `configs/default.yaml` for the full default configuration.
 
-### DINO feature extraction
+### Feature extraction
 
-DINO feature visualization is a two-step workflow: first precompute PCA weights, then render.
+Feature visualization is a two-step workflow: first precompute PCA weights, then render.
 
 Available models:
 - `dinov1-small` — DINO ViT-S/16
@@ -70,6 +70,7 @@ Available models:
 - `dinov2-base` — DINOv2 ViT-B/14
 - `dinov3-small` — DINOv3 ViT-S/16 (gated, requires HuggingFace auth)
 - `dinov3-base` — DINOv3 ViT-B/16 (gated, requires HuggingFace auth)
+- `vitmae-base` — ViT-MAE ViT-B/16
 
 DINOv3 models are gated on HuggingFace. Run `hf auth login` and request access to the model page before use. If authentication is missing, filterworld will print detailed setup instructions.
 
