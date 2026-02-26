@@ -12,6 +12,7 @@ from filterworld.filters.dinov1_filter import DINOv1Filter
 from filterworld.filters.dinov2_filter import DINOv2Filter
 from filterworld.filters.dinov3_filter import DINOv3Filter
 from filterworld.filters.file_filter import FileFilter
+from filterworld.filters.vitmae_filter import ViTMAEFilter
 from filterworld.filters.identity_filter import IdentityFilter
 from filterworld.media.video import VideoReader
 from filterworld.writers.video_writer import VideoWriter
@@ -29,6 +30,7 @@ _MODEL_REGISTRY: dict[str, tuple[str, type[Filter]]] = {
     'dinov2-base': ('facebook/dinov2-base', DINOv2Filter),
     'dinov3-small': ('facebook/dinov3-vits16-pretrain-lvd1689m', DINOv3Filter),
     'dinov3-base': ('facebook/dinov3-vitb16-pretrain-lvd1689m', DINOv3Filter),
+    'vitmae-base': ('facebook/vit-mae-base', ViTMAEFilter),
 }
 
 
