@@ -28,7 +28,7 @@ classifiers = [
 
 dependencies = [
 	"numpy",
-	"opencv-python",
+	"opencv-python-headless",
 	"pyyaml",
 	"scikit-learn",
     "torch",
@@ -80,3 +80,4 @@ exclude = [
 [tool.pytest.ini_options]
 testpaths = "tests"
 generate_report_on_test = "True"
+markers = ["slow: tests that download models"]
